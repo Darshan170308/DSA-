@@ -1,78 +1,101 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define SIZE 5
-struct queue
+struct node
 {
-    int front, rear;
-    int data[SIZE];
+    int co, po;
+    struct node *addr;
 };
-typedef struct queue QUEUE;
-void enqueue(QUEUE *q,int item)
+typedef struct node *NODE;
+NODE insertend(NODE start, int co, int po)
 {
-    if(q->rear==SIZE-1)
-        printf("\n Queue full");
-    else
-    {
-        q->rear=q->rear+1;
-        q->data[q->rear]=item;
-        if(q->front==-1)
-            q->front=0;
-    }
+        NODE temp, cur;
+        temp=(NODE)malloc(sizeof(struct node));
+        temp->co=po;
+        temp->po=po;
+        temp->addr=NULL;
+        if(start==NULL)
+            return temp;
+        cur=temp;
+        while(cur->addr!=NULL)
+            cur=cur->addr;
+        cur->addr=temp;
+        return start;
 }
-void dequeue(QUEUE *q)
+void display(NODE start)
 {
-    if(q->front==-1)
-        printf("\n Queue empty");
+    NODE temp;
+    if(start==NULL)
+        printf("\n Polynomial is empty");
     else
     {
-        printf("\n Element deleted is %d", q->data[q->front]);
-        if(q->front==q->rear)
+        temp=start;
+        while(temp->addr!=NULL)
         {
-            q->front=-1;
-            q->rear=-1;
+            printf("\%d*x^%dt",temp->co, temp->po);
+            temp=temp->addr;
         }
-        else
-            q->front=q->front+1;
+        printf("%d*x^%d",temp->co, temp->po);
     }
 }
-void display(QUEUE q)
+NODE addterm(NODE res, int co, int po)
 {
-    int i;
-       if(q.front==-1)
-            printf("\n Queue is empty");
-            else
-            {
-                printf("\n The content of Queue are \n");
-                for(i=q.front; i<=q.rear; i++)
-                    printf("%d\t", q.data[i]);
-            }
+    NODE temp,cur;
+    temp=(NODE)malloc(sizeof(struct node));
+    temp->co=co;
+    temp->po=po;
+    temp->addr=NULL;
+    if(res=NULL)
+        return temp;
+    cur=res;
+    while(cur!=NULL)
+    {
+        if(cur->po==po)
+        {
+            cur->co=cur->co+po;
+            return res;
+        }
+        cur=cur->addr;
+    }
+    if(cur==NULL)
+        res=insertend(res,co,po);
+    return res;
+}
+NODE multiply(NODE poly1, NODE poly2)
+{
+    NODE p1, p2, res=NULL;
+    for(p1=poly1; p1!=NULL; p1=p1->addr)
+        for(p2=poly2; p2!=NULL; p2=p2->addr)
+        res=addterm(res,p1->co*p2->co,p1->po+p2->po);
+    return res;
 }
 int main()
 {
-    QUEUE q;
-    q.front=-1;
-    q.rear=-1;
-    int item,ch;
-    for(;;)
+    NODE poly1=NULL, poly2=NULL, poly;
+    int n,i,co,po;
+    printf("\n read number of terms of first polynomial:");
+    scanf("%d",&n);
+    for(i=1; i<=n; i++)
     {
-        printf("\n 1.Insert");
-        printf("\n 2.Delete");
-        printf("\n 3.Display");
-        printf("\n 4.Exit");
-        printf("\n Read choice:");
-        scanf("%d",&ch);
-        switch(ch)
-        {
-            case 1:printf("\n Read element to be inserted:");
-                   scanf("%d",&item);
-                   enqueue(&q,item);
-                   break;
-            case 2:dequeue(&q);
-                   break;
-            case 3:display(q);
-                   break;
-            default:exit(0);
-        }
+        printf("\n Read co & po for %d term:",i);
+        scanf("%d%d",&co,&po);
+        poly1=insertend(poly1,co,po);
     }
-    return 0;
+    printf("\n first polynomial is \n");
+    display(poly1);
+
+
+    printf("\n read number of terms of second polynomial:");
+    scanf("%d",&n);
+    for(i=1; i<=n; i++)
+    {
+        printf("\n Read co &po for %d term:",i);
+        scanf("%d%d",&co,&po);
+        poly2=insertend(poly2,co,po);
+    }
+    printf("\n second polynomial is \n");
+    display(poly2);
+    poly=multiply(poly1,poly2);
+    printf("\n the resultant polynomial is \n");
+    display(poly);
+return 0;
 }
